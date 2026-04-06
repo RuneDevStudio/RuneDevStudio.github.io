@@ -1,14 +1,11 @@
 name: Deploy Astro
-
 on:
   push:
     branches: [main]
-
 permissions:
   contents: read
   pages: write
   id-token: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,15 +13,21 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20        # ← von 18 auf 20 (18 ist End-of-Life)
       - run: npm install
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
-
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages         # ← das fehlte, wird für Pages empfohlen
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
     steps:
-      - uses: actions/deploy-pages@v4
+      - id: deployment
+        uses: actions/deploy-pages@v4
